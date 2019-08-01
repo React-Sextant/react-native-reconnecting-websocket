@@ -1,0 +1,22 @@
+{
+  "name": "websocketjs",
+  "version": "1.0.0",
+  "description": "websocket module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/React-Sextant/websocketJs.git"
+  },
+  "dependencies": {
+    "lodash.throttle": "4.1.1"
+  },
+  "author": "1498710037@qq.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/React-Sextant/websocketJs/issues"
+  },
+  "homepage": "https://github.com/React-Sextant/websocketJs#readme"
+}
