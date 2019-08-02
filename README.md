@@ -50,7 +50,7 @@ var socket = new ReconnectingWebSocket(url, null, {reconnectInterval: 3000});
 - Accepts `integer`
 - Default: `30000`
 
-####`reconnectDecay`
+#### `reconnectDecay`
 - The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems persist.
 - Accepts `integer` or `float`
 - Default: `1.5`
