@@ -1,4 +1,4 @@
-React-Native-ReconnectingWebSocket
+React-Native-Reconnecting-WebSocket
 =====================
 
 React native auto reconnect websocket extends WebSocketModule.
