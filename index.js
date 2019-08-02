@@ -1,7 +1,6 @@
 import {NativeModules} from 'react-native'
 const {WebSocketModule} = NativeModules;
 
-let _protocols;
 let timeout;
 let settings = {
     /** The number of milliseconds to delay before attempting to reconnect. */
@@ -21,11 +20,8 @@ let settings = {
 
 class ReconnectingWebSocket extends WebSocket{
     constructor(url,protocols,options) {
-        super(url,protocols,options);
-
-        _protocols = protocols;
-
         if (!options) { options = {}; }
+        super(url,protocols,{headers:options.headers});
 
         // Overwrite and define settings with options if they exist.
         for (let key in settings) {
@@ -43,30 +39,45 @@ class ReconnectingWebSocket extends WebSocket{
 
         /** The number of attempted reconnects since starting, or the last successful connection. Read only. */
         this.reconnectAttempts = 0;
+
+        this.protocols = protocols;
+    }
+
+    _unregisterEvents(){
+        if (this.maxReconnectAttempts && this.reconnectAttempts > this.maxReconnectAttempts) {
+            return super._unregisterEvents();
+        }
     }
 
     _registerEvents(){
         super._registerEvents();
+        this._subscriptions.push(
 
-        /** @override onopen **/
-        this._eventEmitter.addListener('websocketOpen', ev => {
-            this.reconnectAttempts = 0;
-            clearTimeout(timeout);
-        });
+            /** @Override onopen **/
+            this._eventEmitter.addListener('websocketOpen', ev => {
+                if (ev.id !== this._socketId) {
+                    return;
+                }
 
-        /** @override onerror **/
-        this._eventEmitter.addListener('websocketFailed', ev => {
-            if (ev.id !== this._socketId) {
-                return;
-            }
+                clearTimeout(timeout);
+                this.reconnectAttempts = 0
+            }),
 
-            let _timeout = this.reconnectInterval * Math.pow(this.reconnectDecay, this.reconnectAttempts);
-            clearTimeout(timeout);
-            setTimeout(()=>{
-                this.reconnectAttempts++;
-                this.reconnect()
-            }, _timeout > this.maxReconnectInterval ? this.maxReconnectInterval : _timeout);
-        });
+            /** @Override onclose **/
+            this._eventEmitter.addListener('websocketClosed', ev => {
+                if (ev.id !== this._socketId) {
+                    return;
+                }
+
+                let _timeout = this.reconnectInterval * Math.pow(this.reconnectDecay, this.reconnectAttempts);
+
+                clearTimeout(timeout);
+                setTimeout(()=>{
+                    this.reconnectAttempts++;
+                    this.reconnect()
+                }, _timeout > this.maxReconnectInterval ? this.maxReconnectInterval : _timeout);
+            })
+        )
     }
 
     reconnect(){
@@ -77,8 +88,8 @@ class ReconnectingWebSocket extends WebSocket{
 
             WebSocketModule.connect(
                 this.url,
-                _protocols,
-                {origin:this.origin},//headers
+                this.protocols,
+                this.headers,
                 this._socketId,
             );
 

@@ -70,3 +70,55 @@ var socket = new ReconnectingWebSocket(url, null, {reconnectInterval: 3000});
 ## Methods
 
 See the detail in [react-native/WebSocket.js](https://github.com/facebook/react-native/blob/master/Libraries/WebSocket/WebSocket.js)
+
+## How to add heartbeat?
+1. usual
+```javascript
+ws = new WebSocketJs("ws://...");
+
+ws.onopen = (e) => {
+    console.log("onopen",e)
+};
+ws.onmessage = (evt) => {
+    console.log("onmessage",JSON.parse(evt.data))
+};
+ws.onclose = (e) => {
+    console.log("onclose",e)
+};
+ws.onerror = (e) => {
+    console.log("onerror",e)
+};
+```
+2. add heartbeat
+```javascript
+ws.onopen = (e) => {
+    // execute immediately!
+    ws.send("heartbeat string");
+    
+    heartCheck.reset().start()
+};
+
+ws.onmessage = (evt) => {
+    heartCheck.reset().start()
+};
+
+var heartCheck = {
+    timeout: 10000,//default 10s
+    timeoutObj: null,
+    serverTimeoutObj: null,
+    reset:function(){
+        clearTimeout(this.timeoutObj);
+        clearTimeout(this.serverTimeoutObj);
+        return this;
+    },
+    start:function(){
+        let self = this;
+        this.timeoutObj = setTimeout(function(){
+            ws.send("heartbeat string");
+            self.serverTimeoutObj = setTimeout(function(){
+                ws.close();
+            }, self.timeout)
+        }, this.timeout)
+    }
+}
+```

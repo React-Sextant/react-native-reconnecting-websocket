@@ -1,5 +1,5 @@
 {
-  "name": "React-Native-ReconnectingWebSocket",
+  "name": "react-native-reconnectingwebsocket",
   "version": "1.0.0",
   "description": "websocket module",
   "main": "index.js",
