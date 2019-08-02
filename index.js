@@ -1,87 +1,94 @@
 import {NativeModules} from 'react-native'
 const {WebSocketModule} = NativeModules;
 
-let url,protocols,options;
-let lockReconnect = false;//避免重复连接
-let heartCheck = {
-    timeout: 3000,
-    timeoutObj: null,
-    serverTimeoutObj: null,
-    reset: function(){
-        this.timeout = options.reconnectInterval||3000;
-        clearTimeout(this.timeoutObj);
-        clearTimeout(this.serverTimeoutObj);
-        return this;
-    },
-    start: function(context){
-        let self = this;
-        this.timeoutObj = setTimeout(()=>{
-            try{context.send(options.heartBeat)}catch(err){
-                context.reconnect()
-            }
-            self.serverTimeoutObj = setTimeout(function(){
-                context.close();
-            }, self.timeout)
-        }, self.timeout)
-    }
+let _protocols;
+let timeout;
+let settings = {
+    /** The number of milliseconds to delay before attempting to reconnect. */
+    reconnectInterval: 1000,
+    /** The maximum number of milliseconds to delay a reconnection attempt. */
+    maxReconnectInterval: 30000,
+    /** The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems persist. */
+    reconnectDecay: 1.5,
+
+    /** The maximum time in milliseconds to wait for a connection to succeed before closing and retrying. */
+    timeoutInterval: 2000,
+
+    /** The maximum number of reconnection attempts to make. Unlimited if null. */
+    maxReconnectAttempts: null,
 };
-class WebSocketJs extends WebSocket{
-    constructor(_url,_protocols,_options) {
-        super(_url,_protocols,_options);
-        url = _url;
-        protocols = _protocols;
-        options = _options;
+
+
+class ReconnectingWebSocket extends WebSocket{
+    constructor(url,protocols,options) {
+        super(url,protocols,options);
+
+        _protocols = protocols;
+
+        if (!options) { options = {}; }
+
+        // Overwrite and define settings with options if they exist.
+        for (let key in settings) {
+            if (typeof options[key] !== 'undefined') {
+                this[key] = options[key];
+            } else {
+                this[key] = settings[key];
+            }
+        }
+
+        // These should be treated as read-only properties
+
+        /** The URL as resolved by the constructor. This is always an absolute URL. Read only. */
+        this.url = url;
+
+        /** The number of attempted reconnects since starting, or the last successful connection. Read only. */
+        this.reconnectAttempts = 0;
     }
 
     _registerEvents(){
         super._registerEvents();
 
-        //override onopen
+        /** @override onopen **/
         this._eventEmitter.addListener('websocketOpen', ev => {
-            if (ev.id !== this._socketId) {
-                return;
-            }
-            //heart check
-            heartCheck.reset().start(this);
+            this.reconnectAttempts = 0;
+            clearTimeout(timeout);
         });
-        //override onmessage
-        this._eventEmitter.addListener('websocketMessage', ev => {
-            console.log('websocketMessage',ev,this._socketId)
-            if (ev.id !== this._socketId) {
-                return;
-            }
-            //heart check
-            heartCheck.reset().start(this);
-        });
-        //override onclose
-        this._eventEmitter.addListener('websocketClosed', ev => {
-            if (ev.id !== this._socketId) {
-                return;
-            }
-            this.reconnect()
-        });
-        //override onerror
+
+        /** @override onerror **/
         this._eventEmitter.addListener('websocketFailed', ev => {
             if (ev.id !== this._socketId) {
                 return;
             }
-            this.reconnect()
-        })
+
+            let _timeout = this.reconnectInterval * Math.pow(this.reconnectDecay, this.reconnectAttempts);
+            clearTimeout(timeout);
+            setTimeout(()=>{
+                this.reconnectAttempts++;
+                this.reconnect()
+            }, _timeout > this.maxReconnectInterval ? this.maxReconnectInterval : _timeout);
+        });
     }
 
     reconnect(){
-        if(lockReconnect) return;
-        lockReconnect = true;
+        if (this.maxReconnectAttempts && this.reconnectAttempts > this.maxReconnectAttempts) {
+            return;
+        }
         setTimeout(()=>{
+
             WebSocketModule.connect(
-                url,
-                protocols,
-                {},//headers
+                this.url,
+                _protocols,
+                {origin:this.origin},//headers
                 this._socketId,
             );
-            lockReconnect = false;
-        }, options.reconnectInterval);
+
+            timeout=setTimeout(()=>{
+                this.reconnect()
+            },this.timeoutInterval)
+
+        }, this.reconnectInterval);
+
     }
 }
 
-export default WebSocketJs;
+export default ReconnectingWebSocket;

@@ -1,5 +1,5 @@
 {
-  "name": "websocketjs",
+  "name": "React-Native-ReconnectingWebSocket",
   "version": "1.0.0",
   "description": "websocket module",
   "main": "index.js",
@@ -8,15 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/React-Sextant/websocketJs.git"
-  },
-  "dependencies": {
-    "lodash.throttle": "4.1.1"
+    "url": "git+https://github.com/React-Sextant/react-native-reconnectingwebsocket.git"
   },
   "author": "1498710037@qq.com",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/React-Sextant/websocketJs/issues"
+    "url": "https://github.com/React-Sextant/react-native-reconnectingwebsocket/issues"
   },
-  "homepage": "https://github.com/React-Sextant/websocketJs#readme"
+  "homepage": "https://github.com/React-Sextant/react-native-reconnectingwebsocket#readme"
 }
