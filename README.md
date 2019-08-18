@@ -14,6 +14,11 @@ var ws = new ReconnectingWebSocket('ws://....');
 ```
 Less code, more exponential.
 
+## Install <a href="https://npmjs.org/package/react-native-reconnecting-websocket"><img alt="npm version" src="http://img.shields.io/npm/v/react-native-reconnecting-websocket.svg?style=flat-square"></a> <a href="https://npmjs.org/package/react-native-reconnecting-websocket"><img alt="npm version" src="http://img.shields.io/npm/dm/react-native-reconnecting-websocket.svg?style=flat-square"></a>
+```bash
+npm i react-native-reconnecting-websocket
+```
+
 
 ## Parameters
 
@@ -74,7 +79,7 @@ See the detail in [react-native/WebSocket.js](https://github.com/facebook/react-
 ## How to add heartbeat?
 1. usual
 ```javascript
-ws = new WebSocketJs("ws://...");
+ws = new WebSocket("ws://...");
 
 ws.onopen = (e) => {
     console.log("onopen",e)
