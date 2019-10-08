@@ -76,6 +76,21 @@ class ReconnectingWebSocket extends WebSocket{
                     this.reconnectAttempts++;
                     this.reconnect()
                 }, _timeout > this.maxReconnectInterval ? this.maxReconnectInterval : _timeout);
+            }),
+
+            /** @Override onerror **/
+            this._eventEmitter.addListener('websocketFailed', ev => {
+                if (ev.id !== this._socketId) {
+                    return;
+                }
+
+                let _timeout = this.reconnectInterval * Math.pow(this.reconnectDecay, this.reconnectAttempts);
+
+                clearTimeout(timeout);
+                setTimeout(()=>{
+                    this.reconnectAttempts++;
+                    this.reconnect()
+                }, _timeout > this.maxReconnectInterval ? this.maxReconnectInterval : _timeout);
             })
         )
     }
