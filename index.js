@@ -1,7 +1,6 @@
 import {NativeModules} from 'react-native'
 const {WebSocketModule} = NativeModules;
 
-let timeout;
 let settings = {
     /** The number of milliseconds to delay before attempting to reconnect. */
     reconnectInterval: 1000,
@@ -41,6 +40,8 @@ class ReconnectingWebSocket extends WebSocket{
         this.reconnectAttempts = 0;
 
         this.protocols = protocols;
+
+        this.timeout = null;
     }
 
     _unregisterEvents(){
@@ -59,23 +60,8 @@ class ReconnectingWebSocket extends WebSocket{
                     return;
                 }
 
-                clearTimeout(timeout);
+                this.timeout && clearTimeout(this.timeout);
                 this.reconnectAttempts = 0
-            }),
-
-            /** @Override onclose **/
-            this._eventEmitter.addListener('websocketClosed', ev => {
-                if (ev.id !== this._socketId) {
-                    return;
-                }
-
-                let _timeout = this.reconnectInterval * Math.pow(this.reconnectDecay, this.reconnectAttempts);
-
-                clearTimeout(timeout);
-                setTimeout(()=>{
-                    this.reconnectAttempts++;
-                    this.reconnect()
-                }, _timeout > this.maxReconnectInterval ? this.maxReconnectInterval : _timeout);
             }),
 
             /** @Override onerror **/
@@ -86,8 +72,8 @@ class ReconnectingWebSocket extends WebSocket{
 
                 let _timeout = this.reconnectInterval * Math.pow(this.reconnectDecay, this.reconnectAttempts);
 
-                clearTimeout(timeout);
-                setTimeout(()=>{
+                this.timeout && clearTimeout(this.timeout);
+                this.timeout = setTimeout(()=>{
                     this.reconnectAttempts++;
                     this.reconnect()
                 }, _timeout > this.maxReconnectInterval ? this.maxReconnectInterval : _timeout);
@@ -99,7 +85,7 @@ class ReconnectingWebSocket extends WebSocket{
         if (this.maxReconnectAttempts && this.reconnectAttempts > this.maxReconnectAttempts) {
             return;
         }
-        setTimeout(()=>{
+        this.timeout = setTimeout(()=>{
 
             WebSocketModule.connect(
                 this.url,
@@ -107,10 +93,6 @@ class ReconnectingWebSocket extends WebSocket{
                 this.headers,
                 this._socketId,
             );
-
-            timeout=setTimeout(()=>{
-                this.reconnect()
-            },this.timeoutInterval)
 
         }, this.reconnectInterval);
 

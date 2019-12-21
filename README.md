@@ -93,6 +93,11 @@ ws.onclose = (e) => {
 ws.onerror = (e) => {
     console.log("onerror",e)
 };
+
+// add listen connecting event
+ws.onconnecting = () => {
+    console.log("onconnecting")
+}
 ```
 2. add heartbeat
 ```javascript
