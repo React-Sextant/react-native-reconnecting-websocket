@@ -93,10 +93,13 @@ class ReconnectingWebSocket extends WebSocket{
                 this.headers,
                 this._socketId,
             );
+            this.onconnecting({reconnectAttempts:this.reconnectAttempts})
 
         }, this.reconnectInterval);
 
     }
+
+    onconnecting(){}
 }
 
 export default ReconnectingWebSocket;
