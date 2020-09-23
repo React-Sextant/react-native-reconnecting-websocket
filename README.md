@@ -95,8 +95,9 @@ ws.onerror = (e) => {
 };
 
 // add listen connecting event
-ws.onconnecting = () => {
-    console.log("onconnecting")
+// @params reconnectAttempts 尝试重连的次数
+ws.onconnecting = (reconnectAttempts) => {
+    console.log("onconnecting", reconnectAttempts)
 }
 ```
 2. add heartbeat
@@ -131,4 +132,12 @@ var heartCheck = {
         }, this.timeout)
     }
 }
+```
+3. add new API `reconnect()`
+```javascript
+/**
+ * Additional public API method to refresh the connection if still open (close, re-open).
+ * For example, if the app suspects bad data / missed heart beats, it can try to refresh.
+ */
+ws.reconnect()
 ```
