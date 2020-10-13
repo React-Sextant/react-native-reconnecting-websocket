@@ -4,6 +4,8 @@ React-Native-Reconnecting-WebSocket
 React native auto reconnect websocket extends WebSocketModule.
 API design referenced [reconnecting-websocket](https://github.com/joewalnes/reconnecting-websocket).
 
+[🇨🇳中文文档](https://www.jianshu.com/p/8fae2d72448f)
+
 It is API compatible, so when you have:
 ```javascript
 var ws = new WebSocket('ws://....');
@@ -128,6 +130,7 @@ var heartCheck = {
             ws.send("heartbeat string");
             self.serverTimeoutObj = setTimeout(function(){
                 ws.close();
+                ws.reconnect();
             }, self.timeout)
         }, this.timeout)
     }
