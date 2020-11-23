@@ -90,7 +90,7 @@ class ReconnectingWebSocket extends WebSocket{
             WebSocketModule.connect(
                 this.url,
                 this.protocols,
-                this.headers,
+                this.headers || {},
                 this._socketId,
             );
             this.onconnecting({reconnectAttempts:this.reconnectAttempts})
