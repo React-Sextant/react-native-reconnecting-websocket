@@ -127,10 +127,11 @@ var heartCheck = {
     start:function(){
         let self = this;
         this.timeoutObj = setTimeout(function(){
-            ws.send("heartbeat string");
+            if(ws.readyState === ws.OPEN){
+              ws.send("heartbeat string");
+            }
             self.serverTimeoutObj = setTimeout(function(){
-                ws.close();
-                ws.reconnect();
+                ws.reconnect();//本库提供
             }, self.timeout)
         }, this.timeout)
     }
