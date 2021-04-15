@@ -115,6 +115,14 @@ ws.onmessage = (evt) => {
     heartCheck.reset().start()
 };
 
+ws.onclose = () => {
+    if(logout){//如果前端主动关闭(如退出登陆)，不做处理
+
+    }else {//如果服务器主动关闭，前端也需要重连时使用
+        heartCheck.reset().start() 
+    }
+};
+
 var heartCheck = {
     timeout: 10000,//default 10s
     timeoutObj: null,
