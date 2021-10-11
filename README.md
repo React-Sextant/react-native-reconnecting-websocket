@@ -72,6 +72,19 @@ var socket = new ReconnectingWebSocket(url, null, {reconnectInterval: 3000});
 - Accepts `integer` or `null`.
 - Default: `null`
 
+### own options
+
+#### `unrecognized`
+- Preserve deprecated backwards compatibility for the `origin` option
+
+#### `headers` 
+- Specifying `origin` as a WebSocket connection option is deprecated. Include it under `headers` instead
+- Accepts `origin` and `Cookie`
+- Example:
+  ```javascript
+  WebSocket(url, '', {Cookie: 'key=value'});
+  ```
+
 ---
 
 ## Methods
