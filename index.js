@@ -1,5 +1,7 @@
-import {NativeModules} from 'react-native'
-const {WebSocketModule} = NativeModules;
+// import {NativeModules} from 'react-native'
+// const {WebSocketModule} = NativeModules;
+import WebSocketModule from 'react-native/Libraries/WebSocket/NativeWebSocketModule';
+
 
 let settings = {
     /** The number of milliseconds to delay before attempting to reconnect. */
